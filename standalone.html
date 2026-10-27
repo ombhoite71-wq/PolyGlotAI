@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PolyGlot AI — Language Translation Tool</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;700&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: #F4F0EA;
+      color: #111111;
+      min-height: 100vh;
+    }
+    header {
+      background: #FFD600;
+      border-bottom: 3px solid #111111;
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 800;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+    .nb-card {
+      background: #FFFFFF;
+      border: 3px solid #111111;
+      box-shadow: 5px 5px 0px 0px #111111;
+      padding: 20px;
+    }
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 14px;
+      align-items: end;
+    }
+    @media (max-width: 768px) {
+      .controls-grid, .workspace-grid {
+        grid-template-columns: 1fr !important;
+      }
+    }
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+    select, textarea {
+      width: 100%;
+      border: 2px solid #111111;
+      box-shadow: 3px 3px 0px 0px #111111;
+      padding: 10px 12px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 700;
+      background: #FFFDF7;
+      color: #111111;
+    }
+    textarea {
+      min-height: 210px;
+      resize: vertical;
+      font-weight: 500;
+      line-height: 1.55;
+    }
+    .nb-btn {
+      border: 2px solid #111111;
+      box-shadow: 3px 3px 0px 0px #111111;
+      padding: 10px 16px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 800;
+      cursor: pointer;
+      background: #FFD600;
+      color: #111111;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+    .nb-btn:hover {
+      transform: translate(-1px, -1px);
+      box-shadow: 4px 4px 0px 0px #111111;
+    }
+    .nb-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0px 0px #111111;
+    }
+    .nb-btn.secondary { background: #FFFFFF; }
+    .nb-btn.sky { background: #7DD3FC; }
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+      border-bottom: 2px solid #111111;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
+      font-size: 0.92rem;
+    }
+    .output-box {
+      min-height: 210px;
+      border: 2px solid #111111;
+      background: #D1FAE5;
+      padding: 16px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+    .phonetic {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 2px solid #111111;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: #222222;
+    }
+    .card-footer {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 2px solid #111111;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .counter {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">PolyGlot AI — Language Translation Tool</div>
+    <button class="nb-btn" style="background:#111;color:#FFD600;" onclick="translateText()">Translate Now</button>
+  </header>
+
+  <main class="container">
+    <!-- Language Selection Bar -->
+    <section class="nb-card">
+      <div class="controls-grid">
+        <div>
+          <label for="sourceLang">Source Language</label>
+          <select id="sourceLang"></select>
+        </div>
+        <div>
+          <button class="nb-btn" onclick="swapLanguages()" title="Swap Languages">⇄ Swap</button>
+        </div>
+        <div>
+          <label for="targetLang">Target Language</label>
+          <select id="targetLang" style="background:#A7F3D0;"></select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Side-by-Side Source & Target Cards -->
+    <section class="workspace-grid">
+      <div class="nb-card">
+        <div class="card-header">
+          <span>Enter Text</span>
+          <span id="detectedLabel" style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;">Ready</span>
+        </div>
+        <textarea id="sourceText" oninput="updateCount()" placeholder="Type or paste text to translate...">Hello! Welcome to our Language Translation Tool. Select any language above and click Translate.</textarea>
+        <div class="card-footer">
+          <span class="counter" id="charCounter">0 words · 0 chars</span>
+          <div style="display:flex;gap:10px;">
+            <button class="nb-btn secondary" onclick="clearText()">Clear</button>
+            <button class="nb-btn" onclick="translateText()">Translate</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="nb-card">
+        <div class="card-header">
+          <span>Translated Output</span>
+          <span id="statusBadge" style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;">Google Translate API</span>
+        </div>
+        <div class="output-box" id="outputBox">
+          <div id="translatedText">Click "Translate" to see the translation here.</div>
+          <div class="phonetic" id="phoneticBox" style="display:none;"></div>
+        </div>
+        <div class="card-footer">
+          <div style="display:flex;gap:10px;">
+            <button class="nb-btn secondary" id="copyBtn" onclick="copyTranslation()">Copy</button>
+            <button class="nb-btn sky" onclick="speakTranslation()">🔊 Listen (TTS)</button>
+          </div>
+          <button class="nb-btn secondary" onclick="downloadTranslation()">Download .txt</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const LANGUAGES = {
+      "Auto-Detect": "auto",
+      "English": "en",
+      "Hindi": "hi",
+      "Marathi": "mr",
+      "Spanish": "es",
+      "French": "fr",
+      "German": "de",
+      "Japanese": "ja",
+      "Chinese (Simplified)": "zh-CN",
+      "Korean": "ko",
+      "Arabic": "ar",
+      "Portuguese": "pt",
+      "Russian": "ru",
+      "Italian": "it",
+      "Bengali": "bn",
+      "Tamil": "ta",
+      "Telugu": "te",
+      "Gujarati": "gu",
+      "Punjabi": "pa",
+      "Urdu": "ur",
+      "Turkish": "tr",
+      "Vietnamese": "vi",
+      "Dutch": "nl"
+    };
+
+    const srcSelect = document.getElementById("sourceLang");
+    const tgtSelect = document.getElementById("targetLang");
+
+    Object.entries(LANGUAGES).forEach(([name, code]) => {
+      const opt1 = document.createElement("option");
+      opt1.value = code;
+      opt1.textContent = name;
+      srcSelect.appendChild(opt1);
+
+      if (code !== "auto") {
+        const opt2 = document.createElement("option");
+        opt2.value = code;
+        opt2.textContent = name;
+        if (code === "hi") opt2.selected = true;
+        tgtSelect.appendChild(opt2);
+      }
+    });
+
+    function updateCount() {
+      const text = document.getElementById("sourceText").value;
+      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      document.getElementById("charCounter").textContent = `${words} words · ${text.length} chars`;
+    }
+
+    function clearText() {
+      document.getElementById("sourceText").value = "";
+      document.getElementById("translatedText").textContent = "Enter text on the left and click Translate.";
+      document.getElementById("phoneticBox").style.display = "none";
+      updateCount();
+    }
+
+    function swapLanguages() {
+      if (srcSelect.value === "auto") {
+        srcSelect.value = tgtSelect.value;
+        tgtSelect.value = "en";
+      } else {
+        const temp = srcSelect.value;
+        srcSelect.value = tgtSelect.value;
+        tgtSelect.value = temp;
+      }
+      const currentOut = document.getElementById("translatedText").textContent;
+      if (currentOut && !currentOut.startsWith("Click ") && !currentOut.startsWith("Enter ")) {
+        document.getElementById("sourceText").value = currentOut;
+        updateCount();
+        translateText();
+      }
+    }
+
+    async function translateText() {
+      const text = document.getElementById("sourceText").value.trim();
+      if (!text) return;
+
+      const sl = srcSelect.value;
+      const tl = tgtSelect.value;
+      document.getElementById("translatedText").textContent = "Translating...";
+      document.getElementById("phoneticBox").style.display = "none";
+
+      try {
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${encodeURIComponent(sl)}&tl=${encodeURIComponent(tl)}&dt=t&dt=rm&q=${encodeURIComponent(text)}`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        let translated = "";
+        let phonetic = "";
+
+        if (Array.isArray(data[0])) {
+          data[0].forEach(seg => {
+            if (seg[0]) translated += seg[0];
+            if (seg[2]) phonetic += seg[2] + " ";
+          });
+        }
+
+        document.getElementById("translatedText").textContent = translated || "Translation complete.";
+        if (phonetic.trim()) {
+          const pBox = document.getElementById("phoneticBox");
+          pBox.style.display = "block";
+          pBox.textContent = "Pronunciation: " + phonetic.trim();
+        }
+        if (data[2]) {
+          document.getElementById("detectedLabel").textContent = `Detected: ${data[2].toUpperCase()}`;
+        }
+      } catch (err) {
+        document.getElementById("translatedText").textContent = "Error reaching translation API. Check your internet connection.";
+      }
+    }
+
+    function copyTranslation() {
+      const text = document.getElementById("translatedText").textContent;
+      navigator.clipboard.writeText(text);
+      const btn = document.getElementById("copyBtn");
+      btn.textContent = "✓ Copied!";
+      setTimeout(() => (btn.textContent = "Copy"), 1500);
+    }
+
+    function speakTranslation() {
+      const text = document.getElementById("translatedText").textContent;
+      if (!text || !("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = tgtSelect.value;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function downloadTranslation() {
+      const src = document.getElementById("sourceText").value;
+      const out = document.getElementById("translatedText").textContent;
+      const blob = new Blob([`SOURCE:\n${src}\n\nTRANSLATION:\n${out}\n`], { type: "text/plain" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "translation.txt";
+      a.click();
+    }
+
+    updateCount();
+    translateText();
+  </script>
+</body>
+</html>

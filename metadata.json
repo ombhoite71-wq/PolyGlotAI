@@ -1,0 +1,6 @@
+{
+  "name": "PolyGlot AI — Context-Aware Translation Suite",
+  "description": "Context-aware neural translation suite powered by Gemini 2.5 Flash with Romanized phonetic transliteration, cultural nuance calibration, vocabulary breakdown, native TTS audio, and full Streamlit app.py source export.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
